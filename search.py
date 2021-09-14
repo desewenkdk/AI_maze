@@ -1,7 +1,7 @@
 ###### Write Your Library Here ###########
-
-
-
+import pygame
+from maze import Maze as maze
+from collections import deque
 
 
 #########################################
@@ -26,9 +26,17 @@ def bfs(maze):
 
     path=[]
 
+
     ####################### Write Your Code Here ################################
+    visited = []
+    queue = deque()
+    visited.append(start_point)
+    queue.appendleft(start_point)
 
+    while(len(queue) > 0):
+        maze.neighbor
 
+    
 
 
 
