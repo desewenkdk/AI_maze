@@ -24,39 +24,59 @@ def bfs(maze):
     """
     start_point=maze.startPoint()
 
-    path=[]
-
+    path=[] #최단경로를 도착점부터 다시 저장해둘 리스트.
+    stored_path = [[-1 for j in range(maze.cols)] for i in range(maze.rows) ]  #path[cur.row][cur.col] = paraent[row][col]
 
     ####################### Write Your Code Here ################################
-    visited = []
+    visited = [[False for j in range(maze.cols) ] for i in range(maze.rows)]
     queue = deque()
-    visited.append(start_point)
+    
     queue.appendleft(start_point)
+    stored_path[start_point[0]][start_point[1]] = (-1.1, -1.1)
+    dest_row = -1
+    dest_col = -1
 
     while(len(queue) > 0):
-        maze.neighbor
+        current_point = queue.popleft()
+        visited[current_point[0]][current_point[1]] = True
 
+        neighbors = maze.neighborPoints(current_point[0], current_point[1])
+        for point in neighbors:
+            '''
+            NO USE BECAUSE ALREADY IMPLEMENTED IN maze.choosemove()
+
+            if maze.choosemove(point.row, point.col) == False:
+                neighbors.remove(point) #no more way to move from given point.
+            '''
+
+            if maze.isObjective(point[0], point[1]):
+                print("path found!!")
+                stored_path[point[0]][point[1]] = (current_point[0],current_point[1])
+                dest_row = point[0]
+                dest_col = point[1]
+                break
+                
+            elif visited[point[0]][point[1]] == True:
+                neighbors.remove(point) #already visited
+            
+            else:
+                stored_path[point[0]][point[1]] = (current_point[0], current_point[1])
+
+        queue.extend(neighbors)
+
+
+    row = dest_row
+    col = dest_col
+    while(row != 1.1 and col != -1,1):
+        next_r = stored_path[row][col][0]
+        next_c = stored_path[row][col][1]
+
+        path.append((next_r, next_c))
+        row = next_r
+        col = next_c
     
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    path = path.reverse #change order to depart from start point.
     return path
 
     ############################################################################
