@@ -25,56 +25,82 @@ def bfs(maze):
     start_point=maze.startPoint()
 
     path=[] #최단경로를 도착점부터 다시 저장해둘 리스트.
-    stored_path = [[-1 for j in range(maze.cols)] for i in range(maze.rows) ]  #path[cur.row][cur.col] = paraent[row][col]
+
+    # rows and cols are concludes wall, 0 and last row/col num means wall...
+    # so, 0 will ignored, we use 1~row-1, 1~col-1 to coordinate
+    stored_path = [[(-1,-1) for j in range(maze.cols - 1)] for i in range(maze.rows - 1) ]  #path[cur.row][cur.col] = paraent[row][col]
 
     ####################### Write Your Code Here ################################
-    visited = [[False for j in range(maze.cols) ] for i in range(maze.rows)]
+    visited = [[False for j in range(maze.cols - 1) ] for i in range(maze.rows - 1)]
     queue = deque()
     
     queue.appendleft(start_point)
-    stored_path[start_point[0]][start_point[1]] = (-1.1, -1.1)
+    stored_path[start_point[0]][start_point[1]] = (-11, -11)
     dest_row = -1
     dest_col = -1
 
     while(len(queue) > 0):
         current_point = queue.popleft()
+        print("current point and queue before extend")
+        print(current_point)
+        print(queue)
+
+        # if already visited - no search
+        if visited[current_point[0]][current_point[1]]:
+            continue
+
         visited[current_point[0]][current_point[1]] = True
 
+        # Goal Check;
+        if maze.isObjective(current_point[0], current_point[1]):
+            print("path found!!")
+            #stored_path[point[0]][point[1]] = (current_point[0],current_point[1])
+            dest_row = point[0]
+            dest_col = point[1]
+            break
+
+        # expending nodes
         neighbors = maze.neighborPoints(current_point[0], current_point[1])
-        for point in neighbors:
+
+        print("n")
+        print(neighbors)
+        
+        # https://devpouch.tistory.com/110
+        # do not remove elements in list while looping....
+        for point in neighbors[:]:
             '''
             NO USE BECAUSE ALREADY IMPLEMENTED IN maze.choosemove()
 
             if maze.choosemove(point.row, point.col) == False:
                 neighbors.remove(point) #no more way to move from given point.
-            '''
-
-            if maze.isObjective(point[0], point[1]):
-                print("path found!!")
-                stored_path[point[0]][point[1]] = (current_point[0],current_point[1])
-                dest_row = point[0]
-                dest_col = point[1]
-                break
-                
-            elif visited[point[0]][point[1]] == True:
+            ''' 
+            if visited[point[0]][point[1]] == True:
+                print("erased")
+                print(point[0],point[1])
                 neighbors.remove(point) #already visited
             
             else:
+                print("first")
+                print(point[0],point[1])
                 stored_path[point[0]][point[1]] = (current_point[0], current_point[1])
-
+                print(stored_path)
         queue.extend(neighbors)
+        print("after extend")
+        print(queue)
 
-
+    print(stored_path)
     row = dest_row
     col = dest_col
-    while(row != 1.1 and col != -1,1):
+    while(row != -11 and col !=-11):
         next_r = stored_path[row][col][0]
         next_c = stored_path[row][col][1]
 
         path.append((next_r, next_c))
         row = next_r
         col = next_c
-    
+        #print("row,col")
+        #print(str(row) + "," + str(col))
+
 
     path = path.reverse #change order to depart from start point.
     return path
