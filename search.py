@@ -161,8 +161,11 @@ def astar(maze):
     path=[]
 
     ####################### Write Your Code Here ################################
+    current_point = start_point
+    for adj in maze.neighborPoints(current_point[0],current_point[1]):
+        candidate = Node(current_point, adj)
+        
     
-
 
 
 
