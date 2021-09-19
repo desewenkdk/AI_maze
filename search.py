@@ -41,9 +41,9 @@ def bfs(maze):
 
     while(len(queue) > 0):
         current_point = queue.popleft()
-        print("current point and queue before extend")
-        print(current_point)
-        print(queue)
+    #    print("current point and queue before extend")
+    #    print(current_point)
+    #    print(queue)
 
         # if already visited - no search
         if visited[current_point[0]][current_point[1]]:
@@ -53,17 +53,17 @@ def bfs(maze):
 
         # Goal Check;
         if maze.isObjective(current_point[0], current_point[1]):
-            print("path found!!")
+    #        print("path found!!")
             #stored_path[point[0]][point[1]] = (current_point[0],current_point[1])
-            dest_row = point[0]
-            dest_col = point[1]
+            dest_row = current_point[0]
+            dest_col = current_point[1]
             break
 
         # expending nodes
         neighbors = maze.neighborPoints(current_point[0], current_point[1])
 
-        print("n")
-        print(neighbors)
+    #    print("n")
+    #    print(neighbors)
         
         # https://devpouch.tistory.com/110
         # do not remove elements in list while looping....
@@ -75,34 +75,39 @@ def bfs(maze):
                 neighbors.remove(point) #no more way to move from given point.
             ''' 
             if visited[point[0]][point[1]] == True:
-                print("erased")
-                print(point[0],point[1])
+    #            print("erased")
+    #            print(point[0],point[1])
                 neighbors.remove(point) #already visited
             
             else:
-                print("first")
-                print(point[0],point[1])
+    #            print("first")
+    #            print(point[0],point[1])
                 stored_path[point[0]][point[1]] = (current_point[0], current_point[1])
-                print(stored_path)
+    #            print(stored_path)
         queue.extend(neighbors)
-        print("after extend")
-        print(queue)
+    #    print("after extend")
+    #    print(queue)
 
-    print(stored_path)
+    
     row = dest_row
     col = dest_col
+    i=0
+
     while(row != -11 and col !=-11):
         next_r = stored_path[row][col][0]
         next_c = stored_path[row][col][1]
 
         path.append((next_r, next_c))
+        
         row = next_r
         col = next_c
-        #print("row,col")
+        i +=1
+        #
         #print(str(row) + "," + str(col))
 
 
-    path = path.reverse #change order to depart from start point.
+    path.reverse() #change order to depart from start point.
+    print(type(path))
     return path
 
     ############################################################################
@@ -156,7 +161,7 @@ def astar(maze):
     path=[]
 
     ####################### Write Your Code Here ################################
-
+    
 
 
 
