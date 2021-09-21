@@ -155,16 +155,37 @@ def astar(maze):
     """
 
     start_point=maze.startPoint()
-
+    start_node = Node(None, start_point)
     end_point=maze.circlePoints()[0]
 
     path=[]
 
     ####################### Write Your Code Here ################################
-    current_point = start_point
-    for adj in maze.neighborPoints(current_point[0],current_point[1]):
-        candidate = Node(current_point, adj)
+
+    
+    discard = []
+    candidate = []
+
+    current_node = start_node
+    candidate.append(start_node)
+
+    for cand in candidate[:]:
+        if current_node.f > cand.f:
+            current_node = cand
         
+        cur_row = current_node.location[0]
+        cur_col = current_node.location[1]
+        for adj in maze.neighborPoints(cur_row, cur_col):
+            adj_node = Node(current_node, adj)
+            adj_node.g = current_node.g+1
+            adj_node.h = manhatten_dist(adj,end_point)
+
+            adj_node.f = adj_node.g + adj_node.h
+            if adj_node.f <= current_node.f:
+                candidate.append(adj_node)
+            
+            
+
     
 
 
