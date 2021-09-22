@@ -54,7 +54,7 @@ def bfs(maze):
         # Goal Check;
         if maze.isObjective(current_point[0], current_point[1]):
     #        print("path found!!")
-            #stored_path[point[0]][point[1]] = (current_point[0],current_point[1])
+            stored_path[point[0]][point[1]] = (current_point[0],current_point[1])
             dest_row = current_point[0]
             dest_col = current_point[1]
             break
@@ -155,29 +155,67 @@ def astar(maze):
     """
 
     start_point=maze.startPoint()
-
+    start_node = Node(None, start_point)
     end_point=maze.circlePoints()[0]
 
     path=[]
 
     ####################### Write Your Code Here ################################
-    
+    #   
+    discard = []
+    candidate = []
+
+    current_node = start_node
+    candidate.append(start_node)
 
 
+    while len(candidate) > 0:
+        current_node = candidate[0]
 
+        for cand in candidate:
+            if current_node.f > cand.f:
+                current_node = cand
 
+        candidate.remove(current_node)
+        discard.append(current_node)
 
+        if maze.isObjective(current_node.location[0], current_node.location[1]):    
+            candidate.append(current_node)
+            #print("Goal")
+            #print(current_node.location[0], current_node.location[1])
+            break
 
+        cur_row = current_node.location[0]
+        cur_col = current_node.location[1]
+        for adj in maze.neighborPoints(cur_row, cur_col):
 
+            adj_node = Node(current_node, adj)
 
+            # if adjacent node is already discarded - don't search further...
+            if adj_node in discard:
+                continue 
 
+            adj_node.g = current_node.g+1
+            adj_node.h = manhatten_dist(adj,end_point)
 
+            adj_node.f = adj_node.g + adj_node.h
 
-
-
-
-
-
+            # https://info-lab.tistory.com/117
+            # check element in list using if-in statement
+            if adj_node in candidate:
+                if adj_node.g >= current_node.g: #if adjacent node's g >= current: cannot be candidate
+                    continue
+            
+            #only goal-direction positioned nodes can be candidate.
+            candidate.append(adj_node)
+                            
+    path_node = candidate.pop()
+    while(path_node.parent is not None):
+        path.append(path_node.location)
+        t = path_node.parent
+        path_node = t
+    path.reverse()
+    #print(path)
     return path
 
     ############################################################################
