@@ -155,17 +155,57 @@ def astar(maze):
     """
 
     start_point=maze.startPoint()
-
+    start_node = Node(None, start_point)
     end_point=maze.circlePoints()[0]
 
     path=[]
 
     ####################### Write Your Code Here ################################
-    current_point = start_point
-    for adj in maze.neighborPoints(current_point[0],current_point[1]):
-        candidate = Node(current_point, adj)
-        
+
     
+    discard = []
+    candidate = []
+
+    current_node = start_node
+    candidate.append(start_node)
+
+
+    while len(candidate) > 0:
+        current_node = candidate[0]
+
+        for cand in candidate[:]:
+            if current_node.f > cand.f:
+                current_node = cand
+
+        candidate.remove(current_node)
+        discard.append(candidate)
+
+        if maze.isObjective(current_node.location[0], current_node.location[1]):
+            path.append(current_node)
+            print("Goal")
+            print(current_node.location[0], current_node.location[1])
+            break
+
+        cur_row = current_node.location[0]
+        cur_col = current_node.location[1]
+        for adj in maze.neighborPoints(cur_row, cur_col):
+            adj_node = Node(current_node, adj)
+
+            adj_node.g = current_node.g+1
+            adj_node.h = manhatten_dist(adj,end_point)
+
+            adj_node.f = adj_node.g + adj_node.h
+
+
+            # https://info-lab.tistory.com/117
+            # check element in list using if-in statement
+            if adj_node in candidate:
+                if adj_node.g >= current_node.g:
+                    continue
+            
+            candidate.append(adj_node)
+                            
+                    
 
 
 
