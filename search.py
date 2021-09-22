@@ -161,7 +161,10 @@ def astar(maze):
     path=[]
 
     ####################### Write Your Code Here ################################
+<<<<<<< HEAD
 
+=======
+>>>>>>> f599329476c45703a171f31e3779b8cb2df6a14c
     
     discard = []
     candidate = []
@@ -206,6 +209,7 @@ def astar(maze):
             candidate.append(adj_node)
                             
                     
+
 
 
 
