@@ -2,8 +2,8 @@
 import pygame
 from maze import Maze as maze
 from collections import deque
-
-
+from queue import PriorityQueue
+import collections
 #########################################
 
 
@@ -189,6 +189,7 @@ def astar(maze):
         cur_col = current_node.location[1]
         for adj in maze.neighborPoints(cur_row, cur_col):
 
+            #at here, adj node's parent node is updated to minimum F valued node(maybe?)
             adj_node = Node(current_node, adj)
 
             # if adjacent node is already discarded - don't search further...
@@ -225,9 +226,46 @@ def astar(maze):
 
 
 
-def stage2_heuristic():
-    pass
+def stage2_heuristic(cur_point, end_points):
+    #pass
+    pq = PriorityQueue()
+    MSTedges = []
+    start_index = 0
+    
+    #num: cur:0, end_points:1,2,3,4
+    points = []
+    points.append(cur_point)
+    points.extend(end_points)
+    visited = [0] * len(end_points+1)
 
+    #list : [distance, u, v], Graph initialization
+    graph = collections.defaultdict(list)
+    calculated_sum_dist = 0
+
+    for i in range(points):
+        for j in range(i,points):
+            graph[i] = [manhatten_dist(points[i], points[j]), i, j]
+            graph[j] = [manhatten_dist(points[i], points[j]), j, i]
+    
+    visited[start_index] = 1
+    candidate_next_edge = graph[start_index]
+    pq.put(candidate_next_edge)
+
+    while candidate_next_edge:
+        dist, u, v = pq.get()
+
+        #1. check vertex visited, add visited & mst, update total distance sum
+        if visited[u] == 0:
+            visited[u] = 1
+            MSTedges.append(u,v)
+            calculated_sum_dist += dist
+
+        #2. find adjacent edges, add to pq if not make circle
+        for adj_edge in candidate_next_edge[u]:
+            if visited[adj_edge[2]]:
+                pq.push(adj_edge)
+    
+    return calculated_sum_dist
 
 def astar_four_circles(maze):
     """
