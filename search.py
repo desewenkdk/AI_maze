@@ -3,6 +3,7 @@ import pygame
 from maze import Maze as maze
 from collections import deque
 from queue import PriorityQueue
+import heapq
 import collections
 #########################################
 
@@ -227,8 +228,8 @@ def astar(maze):
 
 
 def stage2_heuristic(cur_point, end_points):
-    #pass
-    pq = PriorityQueue()
+    #mst using prim's method
+    
     MSTedges = []
     start_index = 0
     
@@ -236,35 +237,40 @@ def stage2_heuristic(cur_point, end_points):
     points = []
     points.append(cur_point)
     points.extend(end_points)
-    visited = [0] * len(end_points+1)
-
+    visited = [0] * (len(end_points)+1)
+    #print(visited)
     #list : [distance, u, v], Graph initialization
     graph = collections.defaultdict(list)
     calculated_sum_dist = 0
 
-    for i in range(points):
-        for j in range(i,points):
-            graph[i] = [manhatten_dist(points[i], points[j]), i, j]
-            graph[j] = [manhatten_dist(points[i], points[j]), j, i]
+    for i in range(len(points)):
+        for j in range(i,len(points)):
+            graph[i].append([manhatten_dist(points[i], points[j]), i, j])
+            graph[j].append([manhatten_dist(points[i], points[j]), j, i])
     
     visited[start_index] = 1
-    candidate_next_edge = graph[start_index]
-    pq.put(candidate_next_edge)
+    candidate_next_edge = graph[start_index][:]
+    #make (graph)edges to min-heap!!
+    heapq.heapify(candidate_next_edge)
 
     while candidate_next_edge:
-        dist, u, v = pq.get()
+        
+        dist, u, v = heapq.heappop(candidate_next_edge)#u: curr, v:next
 
         #1. check vertex visited, add visited & mst, update total distance sum
-        if visited[u] == 0:
-            visited[u] = 1
-            MSTedges.append(u,v)
+        if visited[v] == 0:
+            visited[v] = 1
+            MSTedges.append([u,v])
             calculated_sum_dist += dist
 
         #2. find adjacent edges, add to pq if not make circle
-        for adj_edge in candidate_next_edge[u]:
-            if visited[adj_edge[2]]:
-                pq.push(adj_edge)
-    
+        
+        for adj_edge in graph[v]:
+            
+            if visited[adj_edge[2]] == 0:
+                #pq.push(adj_edge)
+                
+                heapq.heappush(candidate_next_edge, adj_edge)
     return calculated_sum_dist
 
 def astar_four_circles(maze):
@@ -275,28 +281,86 @@ def astar_four_circles(maze):
 
     end_points=maze.circlePoints()
     end_points.sort()
+    left_end_points = end_points[:]
 
     path=[]
 
     ####################### Write Your Code Here ################################
+    start_point = maze.startPoint()
+    start_node = Node(None, start_point)
 
+    candidate = [start_node]
+    discard = []
+    object_visited_cnt = 0
+    object_visited_list = [0] * len(end_points)
 
+    while candidate:
+        current_node = candidate[0]
 
+        #find least f value node
+        for node in candidate:
+            if node.f < current_node.f:
+                current_node = node
 
+        candidate.remove(current_node)
+        discard.append(current_node)
 
+        #Goal check
+        if maze.isObjective(current_node.location[0],current_node.location[1]):
+            object_visited_list[object_visited_cnt] = 1
+            object_visited_cnt += 1
 
+        #record route.
+            stored_route_nodeinfo = candidate[:]
+            stored_route_nodeinfo.append(current_node)
+            path_node = stored_route_nodeinfo.pop()
+            while(path_node.parent is not None):
+                path.append(path_node.location)
+                t = path_node.parent
+                path_node = t
 
+            for end_point in left_end_points:
+                if end_point == current_node.location:
+                    left_end_points.remove(end_point)
+                    break
 
+            if len(left_end_points) <= 0:
+                print("no left end points")
+                if object_visited_cnt == len(end_points):
+                    print("all end points are visited")
+                    candidate.append(current_node)
+                    break
+            
+        cur_row = current_node.location[0]
+        cur_col = current_node.location[1]
+        for adj in maze.neighborPoints(cur_row, cur_col):
 
+            #at here, adj node's parent node is updated to minimum F valued node(maybe?)
+            adj_node = Node(current_node, adj)
 
+            # if adjacent node is already discarded - don't search further...
+            if adj_node in discard:
+                continue 
 
+            adj_node.g = current_node.g+1
+            adj_node.h = stage2_heuristic(adj,left_end_points)
 
+            adj_node.f = adj_node.g + adj_node.h
 
-
-
-
-
-
+            if adj_node in candidate:
+                if adj_node.g >= current_node.g: #if adjacent node's g >= current: cannot be candidate
+                    continue
+            
+            #only goal-direction positioned nodes can be candidate.
+            candidate.append(adj_node)
+                            
+    path_node = candidate.pop()
+    while(path_node.parent is not None):
+        path.append(path_node.location)
+        t = path_node.parent
+        path_node = t
+    path.reverse()
+    #print(path)
     return path
 
     ############################################################################
