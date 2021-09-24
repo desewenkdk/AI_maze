@@ -19,6 +19,8 @@ usage: maze_game.py [-h] [--method {bfs,astar,astar_four_circles,astar_many_circ
 Examples of how to run maze_game.py:
 ```
 python maze_game.py category/stage1/small.txt --method bfs
+python maze_game.py category/stage2/small.txt --method astar_four_circles
+python maze_game.py category/stage3/small.txt --method astar_many_circles
 ```
 ```
 python maze_game.py category/stage1/small.txt --scale 30 --speed 10 --keyboard

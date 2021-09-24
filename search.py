@@ -310,7 +310,7 @@ def astar_four_circles(maze):
             object_visited_list[object_visited_cnt] = 1
             object_visited_cnt += 1
 
-        #record route.
+        #record route when reach to one of end point.
             stored_route_nodeinfo = candidate[:]
             stored_route_nodeinfo.append(current_node)
             path_node = stored_route_nodeinfo.pop()
@@ -319,6 +319,7 @@ def astar_four_circles(maze):
                 t = path_node.parent
                 path_node = t
 
+        #remove visited end point, to build new MST without visited end point!!
             for end_point in left_end_points:
                 if end_point == current_node.location:
                     left_end_points.remove(end_point)
@@ -371,28 +372,63 @@ def astar_four_circles(maze):
 
 def mst(objectives, edges):
 
+    MSTedges = []
     cost_sum=0
+    started_index = 0
+
     ####################### Write Your Code Here ################################
+    visited = [0] * (len(objectives)+1)
+    visited[started_index] = 1
+    candidate_next_edge = edges[started_index][:]
+    #make (graph)edges to min-heap!!
+    heapq.heapify(candidate_next_edge)
 
+    while candidate_next_edge:
+        
+        dist, u, v = heapq.heappop(candidate_next_edge)#u: curr, v:next
 
+        #1. check vertex visited, add visited & mst, update total distance sum
+        if visited[v] == 0:
+            visited[v] = 1
+            MSTedges.append([u,v])
+            cost_sum += dist
 
-
-
-
-
-
-
-
-
-
+        #2. find adjacent edges, add to pq if not make circle
+        
+        for adj_edge in edges[v]:
+            
+            if visited[adj_edge[2]] == 0:
+                #pq.push(adj_edge)
+                
+                heapq.heappush(candidate_next_edge, adj_edge)
 
     return cost_sum
 
     ############################################################################
 
 
-def stage3_heuristic():
-    pass
+def stage3_heuristic(cur_point, end_points):
+    #mst using prim's method
+    
+    MSTedges = []
+    start_index = 0
+    
+    #num: cur:0, end_points:1,2,3,4,......many
+    points = []
+    points.append(cur_point)
+    points.extend(end_points)
+    
+    #print(visited)
+    #list : [distance, u, v], Graph initialization
+    graph = collections.defaultdict(list)
+    calculated_sum_dist = 0
+
+    for i in range(len(points)):
+        for j in range(i,len(points)):
+            graph[i].append([manhatten_dist(points[i], points[j]), i, j])
+            graph[j].append([manhatten_dist(points[i], points[j]), j, i])
+    
+    return mst(end_points, graph)
 
 
 def astar_many_circles(maze):
@@ -401,34 +437,92 @@ def astar_many_circles(maze):
     (단 Heurstic Function은 위의 stage3_heuristic function을 직접 정의하여 사용해야 하고, minimum spanning tree
     알고리즘을 활용한 heuristic function이어야 한다.)
     """
-
+    #######################################################
+    # you can re-use function used to solve problem 03!!!!! because i already built MST-based heuristic function.
+    # like this: return astar_four_circles(maze)
     end_points= maze.circlePoints()
     end_points.sort()
 
     path=[]
 
     ####################### Write Your Code Here ################################
+    left_end_points = end_points[:]
+    start_point = maze.startPoint()
+    start_node = Node(None, start_point)
 
+    candidate = [start_node]
+    discard = []
+    object_visited_cnt = 0
+    object_visited_list = [0] * len(end_points)
 
+    while candidate:
+        current_node = candidate[0]
 
+        #find least f value node
+        for node in candidate:
+            if node.f < current_node.f:
+                current_node = node
 
+        candidate.remove(current_node)
+        discard.append(current_node)
 
+        #Goal check
+        if maze.isObjective(current_node.location[0],current_node.location[1]):
+            object_visited_list[object_visited_cnt] = 1
+            object_visited_cnt += 1
 
+        #record route when reach to one of end point.
+            stored_route_nodeinfo = candidate[:]
+            stored_route_nodeinfo.append(current_node)
+            path_node = stored_route_nodeinfo.pop()
+            while(path_node.parent is not None):
+                path.append(path_node.location)
+                t = path_node.parent
+                path_node = t
 
+        #remove visited end point, to build new MST without visited end point!!
+            for end_point in left_end_points:
+                if end_point == current_node.location:
+                    left_end_points.remove(end_point)
+                    break
 
+            if len(left_end_points) <= 0:
+                print("no left end points")
+                if object_visited_cnt == len(end_points):
+                    print("all end points are visited")
+                    candidate.append(current_node)
+                    break
+            
+        cur_row = current_node.location[0]
+        cur_col = current_node.location[1]
+        for adj in maze.neighborPoints(cur_row, cur_col):
 
+            #at here, adj node's parent node is updated to minimum F valued node(maybe?)
+            adj_node = Node(current_node, adj)
 
+            # if adjacent node is already discarded - don't search further...
+            if adj_node in discard:
+                continue 
 
+            adj_node.g = current_node.g+1
+            adj_node.h = stage2_heuristic(adj,left_end_points)
 
+            adj_node.f = adj_node.g + adj_node.h
 
-
-
-
-
-
-
-
-
+            if adj_node in candidate:
+                if adj_node.g >= current_node.g: #if adjacent node's g >= current: cannot be candidate
+                    continue
+            
+            #only goal-direction positioned nodes can be candidate.
+            candidate.append(adj_node)
+                            
+    path_node = candidate.pop()
+    while(path_node.parent is not None):
+        path.append(path_node.location)
+        t = path_node.parent
+        path_node = t
+    path.reverse()
+    #print(path)
     return path
 
     ############################################################################
