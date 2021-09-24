@@ -42,11 +42,8 @@ def bfs(maze):
 
     while(len(queue) > 0):
         current_point = queue.popleft()
-    #    print("current point and queue before extend")
-    #    print(current_point)
-    #    print(queue)
 
-        # if already visited - no search
+        # if already visited - don't search
         if visited[current_point[0]][current_point[1]]:
             continue
 
@@ -63,10 +60,6 @@ def bfs(maze):
         # expending nodes
         neighbors = maze.neighborPoints(current_point[0], current_point[1])
 
-    #    print("n")
-    #    print(neighbors)
-        
-        # https://devpouch.tistory.com/110
         # do not remove elements in list while looping....
         for point in neighbors[:]:
             '''
@@ -307,9 +300,8 @@ def astar_four_circles(maze):
             object_visited_cnt += 1
 
         #record route when reach to one of end point.
-            stored_route_nodeinfo = candidate[:]
-            stored_route_nodeinfo.append(current_node)
-            path_node = stored_route_nodeinfo.pop()
+            
+            path_node = current_node
             while(path_node.parent is not None):
                 path.append(path_node.location)
                 t = path_node.parent
@@ -469,9 +461,8 @@ def astar_many_circles(maze):
             object_visited_cnt += 1
 
         #record route when reach to one of end point.
-            stored_route_nodeinfo = candidate[:]
-            stored_route_nodeinfo.append(current_node)
-            path_node = stored_route_nodeinfo.pop()
+            
+            path_node = current_node
             while(path_node.parent is not None):
                 path.append(path_node.location)
                 t = path_node.parent
