@@ -202,8 +202,6 @@ def astar(maze):
 
             adj_node.f = adj_node.g + adj_node.h
 
-            # https://info-lab.tistory.com/117
-            # check element in list using if-in statement
             if adj_node in candidate:
                 if adj_node.g >= current_node.g: #if adjacent node's g >= current: cannot be candidate
                     continue
@@ -224,9 +222,6 @@ def astar(maze):
 
 
 # -------------------- Stage 02: Four circles - A* Algorithm  ------------------------ #
-
-
-
 def stage2_heuristic(cur_point, end_points):
     #mst using prim's method
     
@@ -239,18 +234,20 @@ def stage2_heuristic(cur_point, end_points):
     points.extend(end_points)
     visited = [0] * (len(end_points)+1)
     #print(visited)
-    #list : [distance, u, v], Graph initialization
-    graph = collections.defaultdict(list)
+    #list : [distance, u, v], represents edge
+    # Edge stored list initialization, points are current, and end-points to visit
+    edges = collections.defaultdict(list)
     calculated_sum_dist = 0
 
     for i in range(len(points)):
         for j in range(i,len(points)):
-            graph[i].append([manhatten_dist(points[i], points[j]), i, j])
-            graph[j].append([manhatten_dist(points[i], points[j]), j, i])
+            edges[i].append([manhatten_dist(points[i], points[j]), i, j])
+            edges[j].append([manhatten_dist(points[i], points[j]), j, i])
     
     visited[start_index] = 1
-    candidate_next_edge = graph[start_index][:]
-    #make (graph)edges to min-heap!!
+    candidate_next_edge = edges[start_index][:]
+
+    #make edges to min-heap!!
     heapq.heapify(candidate_next_edge)
 
     while candidate_next_edge:
@@ -264,8 +261,7 @@ def stage2_heuristic(cur_point, end_points):
             calculated_sum_dist += dist
 
         #2. find adjacent edges, add to pq if not make circle
-        
-        for adj_edge in graph[v]:
+        for adj_edge in edges[v]:
             
             if visited[adj_edge[2]] == 0:
                 #pq.push(adj_edge)
@@ -385,6 +381,7 @@ def mst(objectives, edges):
 
     while candidate_next_edge:
         
+        #awesome python technique
         dist, u, v = heapq.heappop(candidate_next_edge)#u: curr, v:next
 
         #1. check vertex visited, add visited & mst, update total distance sum
